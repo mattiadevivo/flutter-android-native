@@ -1,0 +1,9 @@
+include ':app'
+setBinding(new Binding([gradle: this]))
+evaluate(new File(
+  settingsDir,
+  'thermo_module/.android/include_flutter.groovy'
+))
+rootProject.name='Flutter Integration'
+
+include ':thermo_module'
