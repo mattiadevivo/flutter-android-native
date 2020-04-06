@@ -114,8 +114,8 @@ class BasePainter extends CustomPainter {
     tp.layout();
     tp.paint(
         canvas,
-        Offset((size.width / 2) + radius + sliderStrokeWidth / 2 + 8.0,
-            (size.height / 2) - 8.0));
+        Offset((size.width / 2) + radius + sliderStrokeWidth / 2 + 10.0,
+            (size.height / 2) - 10.0));
 
     // 12:00 line drawing.
     p1 = Offset(

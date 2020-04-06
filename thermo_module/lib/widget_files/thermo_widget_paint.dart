@@ -353,7 +353,6 @@ class _CircularSliderState extends State<CircularSliderPaint> {
     var percentage = radiansToPercentage(angle);
     // Int value on the slider representing the new value of the handler.
     var newValue = percentageToValue(percentage, widget.divisions);
-
     if (isBothHandlersSelected) {
       // The user is dragging a section between two handlers.
       if (_isSecondHandlerSelected && _isFirstHandlerSelected) {
@@ -361,7 +360,14 @@ class _CircularSliderState extends State<CircularSliderPaint> {
         // Calculates new value for handler #1.
         var newFirstValue =
             (newValue - _differenceFromInitPoint) % widget.divisions;
-        if (newFirstValue != widget.firstValue) {
+        if(isPanEnd){
+          // We invoke onSelectionEnd with the same values because
+          // newFirstValue != widget.firstValue) is always false, this due to the fact
+          // that values were update by the before handlePan call.
+          widget.onSelectionEnd(
+              widget.firstValue, widget.secondValue, widget.thirdValue, widget.fourthValue);
+        }
+        else if (newFirstValue != widget.firstValue) {
           // Handler #1 is at a different position so update all the values.
           var diff = newFirstValue - widget.firstValue;
           var newSecondValue = (widget.secondValue + diff) % widget.divisions;
@@ -369,16 +375,19 @@ class _CircularSliderState extends State<CircularSliderPaint> {
           var newFourthValue = (widget.fourthValue + diff) % widget.divisions;
           widget.onSelectionChange(
               newFirstValue, newSecondValue, newThirdValue, newFourthValue);
-          if (isPanEnd) {
-            widget.onSelectionEnd(
-                newFirstValue, newSecondValue, newThirdValue, newFourthValue);
-          }
         }
       } else if (_isThirdHandlerSelected && _isSecondHandlerSelected) {
         // The user is moving the section between handler #2 and #3.
         var newSecondValue =
             (newValue - _differenceFromInitPoint) % widget.divisions;
-        if (newSecondValue != widget.secondValue) {
+        if(isPanEnd){
+          // We invoke onSelectionEnd with the same values because
+          // newSecondValue != widget.secondValue) is always false, this due to the fact
+          // that values were update by the before handlePan call.
+          widget.onSelectionEnd(
+              widget.firstValue, widget.secondValue, widget.thirdValue, widget.fourthValue);
+        }
+        else if (newSecondValue != widget.secondValue) {
           // Handler #2 is at a different position so update all the values.
           var diff = newSecondValue - widget.secondValue;
           var newThirdValue = (widget.thirdValue + diff) % widget.divisions;
@@ -386,16 +395,19 @@ class _CircularSliderState extends State<CircularSliderPaint> {
           var newFirstValue = (widget.firstValue + diff) % widget.divisions;
           widget.onSelectionChange(
               newFirstValue, newSecondValue, newThirdValue, newFourthValue);
-          if (isPanEnd) {
-            widget.onSelectionEnd(
-                newFirstValue, newSecondValue, newThirdValue, newFourthValue);
-          }
         }
       } else if (_isFourthHandlerSelected && _isThirdHandlerSelected) {
         // The user is moving the section between handler #3 and #4.
         var newThirdValue =
             (newValue - _differenceFromInitPoint) % widget.divisions;
-        if (newThirdValue != widget.thirdValue) {
+        if(isPanEnd){
+          // We invoke onSelectionEnd with the same values because
+          // newThirdValue != widget.thirdValue) is always false, this due to the fact
+          // that values were update by the before handlePan call.
+          widget.onSelectionEnd(
+              widget.firstValue, widget.secondValue, widget.thirdValue, widget.fourthValue);
+        }
+        else if (newThirdValue != widget.thirdValue) {
           // Handler #3 is at a different position so update all the values.
           var diff = newThirdValue - widget.thirdValue;
           var newFourthValue = (widget.fourthValue + diff) % widget.divisions;
@@ -403,16 +415,19 @@ class _CircularSliderState extends State<CircularSliderPaint> {
           var newSecondValue = (widget.secondValue + diff) % widget.divisions;
           widget.onSelectionChange(
               newFirstValue, newSecondValue, newThirdValue, newFourthValue);
-          if (isPanEnd) {
-            widget.onSelectionEnd(
-                newFirstValue, newSecondValue, newThirdValue, newFourthValue);
-          }
         }
       } else {
         // The user is moving the section between handler #4 and #1.
         var newFourthValue =
             (newValue - _differenceFromInitPoint) % widget.divisions;
-        if (newFourthValue != widget.fourthValue) {
+        if(isPanEnd){
+          // We invoke onSelectionEnd with the same values because
+          // newFourthValue != widget.fourthValue) is always false, this due to the fact
+          // that values were update by the before handlePan call.
+          widget.onSelectionEnd(
+              widget.firstValue, widget.secondValue, widget.thirdValue, widget.fourthValue);
+        }
+        else if (newFourthValue != widget.fourthValue) {
           // Handler #4 is at a different position so update all the values.
           var diff = newFourthValue - widget.fourthValue;
           var newFirstValue = (widget.firstValue + diff) % widget.divisions;
@@ -420,10 +435,6 @@ class _CircularSliderState extends State<CircularSliderPaint> {
           var newThirdValue = (widget.thirdValue + diff) % widget.divisions;
           widget.onSelectionChange(
               newFirstValue, newSecondValue, newThirdValue, newFourthValue);
-          if (isPanEnd) {
-            widget.onSelectionEnd(
-                newFirstValue, newSecondValue, newThirdValue, newFourthValue);
-          }
         }
       }
       // No need to manage singular handlers.

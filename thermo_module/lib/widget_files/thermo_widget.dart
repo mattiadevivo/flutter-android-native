@@ -108,15 +108,23 @@ class TempSlider extends StatefulWidget {
         this.handlerOutterRadius,
         this.sliderStrokeWidth,
       })  : assert(firstValue >= 0 && firstValue < divisions,
-  'init has to be > 0 and < divisions value'),
-        assert(secondValue > firstValue && secondValue < divisions,
-        'end has to be > 0 and < divisions value'),
+  'firstValue has to be >= 0 and < divisions'),
+        assert(secondValue >= 0 && secondValue < divisions,
+        'secondValuee has to be >= 0 and < divisions'),
+        assert(thirdValue >= 0 && thirdValue < divisions,
+        'thirdValue has to be >= 0 end and < divisions'),
+        assert(fourthValue >= 0 && fourthValue < divisions,
+        'fourthValue has to be >= 0 and < init'),
+        assert(
+        firstValue != secondValue &&
+            firstValue != thirdValue &&
+            firstValue != fourthValue &&
+            secondValue != thirdValue &&
+            secondValue != fourthValue &&
+            thirdValue != fourthValue,
+        'All the values must be different'),
         assert(divisions >= 0 && divisions <= 300,
-        'divisions has to be > 0 and <= 300'),
-        assert(thirdValue > secondValue && thirdValue < fourthValue,
-        'init_2 has to be > end and < end_2'),
-        assert(fourthValue > thirdValue && fourthValue < divisions,
-        'end_2 has to be > 0 init_2 and < init');
+        'divisions has to be >= 0 and <= 300');
 
   @override
   _TempSliderState createState() => _TempSliderState();
@@ -187,9 +195,9 @@ class _TempSliderState extends State<TempSlider> {
           hoursColor: widget.hoursColor ?? Color.fromRGBO(255, 255, 255, 0.3),
           minutesColor: widget.minutesColor ?? Colors.white30,
           section12Color: widget.section12Color ?? Colors.amber,
-          section23Color: widget.section23Color ?? Colors.blue,
-          section34Color: widget.section34Color ?? Colors.deepPurpleAccent,
-          section41Color: widget.section41Color ?? Colors.brown,
+          section23Color: widget.section23Color ?? Colors.deepPurpleAccent,
+          section34Color: widget.section34Color ?? Colors.amber,
+          section41Color: widget.section41Color ?? Colors.brown[400],
           handlerColor: widget.handlerColor ?? Colors.white,
           handlerOutterRadius: widget.handlerOutterRadius ?? 22.0,
         ));

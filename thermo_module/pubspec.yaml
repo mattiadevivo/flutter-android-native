@@ -24,6 +24,12 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Package for consuming http, platform independent
+  http: ^0.12.0+4
+  # Package for using json annotations
+  json_annotation: ^3.0.1
+  # Package for Shared Preferences
+  shared_preferences: ^0.5.6+3
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2

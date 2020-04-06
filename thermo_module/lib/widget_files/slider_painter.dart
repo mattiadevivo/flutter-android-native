@@ -183,7 +183,7 @@ class SliderPainter extends CustomPainter {
   void _paintIcon(Canvas canvas, int number) {
     double adj = 3.0;
     TextPainter textPainter = TextPainter(
-        textDirection: TextDirection.rtl, textAlign: TextAlign.center);
+        textDirection: TextDirection.ltr, textAlign: TextAlign.center);
     // Dimension of the icons.
     double iconDim = sliderStrokeWidth - 8.0;
     switch (number) {
@@ -232,7 +232,7 @@ class SliderPainter extends CustomPainter {
         pos = Offset(pos.dx - sliderStrokeWidth / 3 - adj,
             pos.dy - sliderStrokeWidth / 3 - adj);
         // Icon.
-        var icon = Icons.brightness_3;
+        var icon = Icons.work;
         // TextPainter settings.
         textPainter.text = TextSpan(
             text: String.fromCharCode(icon.codePoint),
@@ -306,7 +306,7 @@ class SliderPainter extends CustomPainter {
         pos = Offset(pos.dx - sliderStrokeWidth / 3 - adj,
             pos.dy - sliderStrokeWidth / 3 - adj);
         // Icon.
-        var icon = Icons.directions_car;
+        var icon = Icons.brightness_3;
         // TextPainter settings.
         textPainter.text = TextSpan(
             text: String.fromCharCode(icon.codePoint),
@@ -363,7 +363,8 @@ class SliderPainter extends CustomPainter {
     // Stroke configuration for the handler.
     Paint handler = _getPaint(color: handlerColor, style: PaintingStyle.fill);
     // Stroke configuration for the outter circle of the handler.
-    Paint handlerOutter = _getPaint(color: Colors.black26, width: 2.0);
+    Paint handlerOutter = _getPaint(
+        color: Colors.black26, width: 2.0, style: PaintingStyle.stroke);
 
     // Font size of the time painted inside handlers.
     double fontSize = handlerRadius - handlerRadius / 4 - 1;
