@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thermo_module/widget_files/utils.dart';
+import 'package:thermo_module/widget/utils.dart';
 import 'network_exceptions.dart';
 
 /// Converts the [hexString] into a binary string.
@@ -37,6 +37,14 @@ String _binaryToHex(String binaryString) {
   return hexString;
 }
 
+/// Extracts the handlers' values from the [binaryString] representing the day
+/// configuration.
+///
+/// Returns a List<int> where:
+/// [0] => handler #1 position
+/// [1] => handler #2 position
+/// [2] => handler #3 position
+/// [3] => handler #4 position.
 List<int> _getTimes(String binaryString){
   Map<String, int> t3Section = Map();
   Map<String, int> t3Section2 = Map();
@@ -44,91 +52,124 @@ List<int> _getTimes(String binaryString){
   Map<String, int> t1Section = Map();
 
   for(int i = 0; i <= binaryString.length - 2; i += 2){
+    // A quarter of hour is represented by two binary digits.
+    // substring() returns a string with the digits from position i to i + 2 - 1.
     String quarter = binaryString.substring(i, i + 2);
     switch(quarter){
       case '11':
+        // T3 section.
         if(t3Section['start'] == null || t3Section['finish'] == null){
-          //
+          // Part of the first T3 section.
           if(t3Section['start'] == null){
+            // This is the first part of T3 section we analyze.
             if(i == 0 && binaryString.substring(binaryString.length - 2,binaryString.length) == quarter){
+              // This is the first quarter of the day configuration and the section starts before midnight.
               int j = binaryString.length - 2;
               while(binaryString.substring(j - 2,j) == quarter){
                 j -= 2;
               }
               t3Section['start'] = j ~/ 2;
             } else{
+              // This is not the first quarter of the day configuration or the section doesn't start
+              // before midnight.
               t3Section['start'] = i ~/ 2;
             }
           }
           if(t3Section['finish'] == null) {
+            // End of the section is not yet defined.
             if (i + 2 <= (binaryString.length - 2) &&
                 binaryString.substring(i + 2, i + 4) != quarter) {
+              // If the next quarter is different from this one, this is the end of section.
               t3Section['finish'] = i ~/ 2;
             } else if (i + 2 > (binaryString.length - 2)) {
+              // This is the last quarter of day configuration, so it's the end of the section.
               t3Section['finish'] = (binaryString.length - 2) ~/ 2;
             }
           }
         } else {
+          // Part of the T3 section #2.
           if(t3Section2['start'] == null){
+            // This is the first part of T3 section #2 we analyze.
             if(i == 0 && binaryString.substring(binaryString.length - 2,binaryString.length) == quarter){
+              // This is the first quarter of the day configuration and the section starts before midnight.
               int j = binaryString.length - 2;
               while(binaryString.substring(j - 2,j) == quarter){
                 j -= 2;
               }
               t3Section2['start'] = j ~/ 2;
             } else{
+              // This is not the first quarter of the day configuration or the section doesn't start
+              // before midnight.
               t3Section2['start'] = i ~/ 2;
             }
           }
           if(t3Section2['finish'] == null) {
+            // End of the section is not yet defined.
             if (i + 2 <= (binaryString.length - 2) &&
                 binaryString.substring(i + 2, i + 4) != quarter) {
+              // If the next quarter is different from this one, this is the end of section.
               t3Section2['finish'] = i ~/ 2;
             } else if (i + 2 > (binaryString.length - 2)) {
+              // This is the last quarter of day configuration, so it's the end of the section.
               t3Section2['finish'] = (binaryString.length - 2) ~/ 2;
             }
           }
         }
         break;
       case '10':
+        // Part of T2 section.
         if(t2Section['start'] == null) {
+          // This is the first part of T2 section we analyze.
           if(i == 0 && binaryString.substring(binaryString.length - 2,binaryString.length) == quarter){
+            // This is the first quarter of the day configuration and the section starts before midnight.
             int j = binaryString.length - 2;
             while(binaryString.substring(j - 2,j) == quarter){
               j -= 2;
             }
             t2Section['start'] = j ~/ 2;
           } else{
+            // This is not the first quarter of the day configuration or the section doesn't start
+            // before midnight.
             t2Section['start'] = i ~/ 2;
           }
         }
         if(t2Section['finish'] == null) {
+          // End of the section is not yet defined.
           if (i + 2 <= (binaryString.length - 2) &&
               binaryString.substring(i + 2, i + 4) != quarter) {
+            // If the next quarter is different from this one, this is the end of section.
             t2Section['finish'] = i ~/ 2;
           } else if (i + 2 > (binaryString.length - 2)) {
+            // This is the last quarter of day configuration, so it's the end of the section.
             t2Section['finish'] = (binaryString.length - 2) ~/ 2;
           }
         }
         break;
       case '01':
+        // Part of T1 section.
         if(t1Section['start'] == null) {
+          // This is the first part of T\ section we analyze.
           if(i == 0 && binaryString.substring(binaryString.length - 2,binaryString.length) == quarter){
+            // This is the first quarter of the day configuration and the section starts before midnight.
             int j = binaryString.length - 2;
             while(binaryString.substring(j - 2,j) == quarter){
               j -= 2;
             }
             t1Section['start'] = j ~/ 2;
           } else{
+            // This is not the first quarter of the day configuration or the section doesn't start
+            // before midnight.
             t1Section['start'] = i ~/ 2;
           }
-          t1Section['start'] = i ~/ 2;
         }
         if(t1Section['finish'] == null) {
+          // End of the section is not yet defined.
           if (i + 2 <= (binaryString.length - 2) &&
               binaryString.substring(i + 2, i + 4) != quarter) {
+            // If the next quarter is different from this one, this is the end of section.
             t1Section['finish'] = i ~/ 2;
           } else if (i + 2 > (binaryString.length - 2)) {
+            // This is the last quarter of day configuration, so it's the end of the section.
             t1Section['finish'] = (binaryString.length - 2) ~/ 2;
           }
         }
@@ -141,13 +182,19 @@ List<int> _getTimes(String binaryString){
   print('t1 section: ${t1Section.toString()}');
   int firstTime, secondTime, thirdTime, fourthTime;
   if((t3Section['finish'] + 1) % 96 == t2Section['start']) {
+    // t3Section is the section from handler #1 to handler #2.
+    // t3section2 is the section from handler #3 to handler #4.
     firstTime = t3Section['start'];
     thirdTime = t3Section2['start'];
   } else {
+    // t3Section2 is the section from handler #1 to handler #2.
+    // t3section is the section from handler #3 to handler #4.
     firstTime = t3Section2['start'];
     thirdTime = t3Section['start'];
   }
+  // Start of section from handler #2 to handler #3.
   secondTime = t2Section['start'];
+  // Start of section from handler #4 to handler #1.
   fourthTime = t1Section['start'];
   return [firstTime, secondTime, thirdTime, fourthTime];
 }
@@ -298,139 +345,4 @@ class RestApiHelper {
     // Converts the configuration into binary and sent back to the caller.
     return _getTimes(_hexToBinary(weekConf['day$dayNumber'] as String));
   }
-
-/*
-  --- RISPOSTA Get Token
-  {
-    "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJDbGllbnRVcmkiOiJjYW1lY29ubmVjdC5uZXQ6ZmUyYjgwZmI1NTA5OTYxNDgwNTBmMDJmZGZjZTg0MTciLCJhdWQiOltdLCJleHAiOjE1ODUxMzIyMjIsImlhdCI6MTU4NTEyNTAyMiwiaXNzIjoiQ2FtZV9Db25uZWN0IiwianRpIjoiZDkzODJiNTQtMGExNC00YTUzLTkzOTktMmY5OWU2NzM2ZDExIiwicGVybWlzc2lvbnMiOiJVU0VSIiwic2NwIjpbXSwic3ViIjoidXNlci5jYW1lY29ubmVjdCIsInVzZXJpZCI6MTAxMSwidXNlcm5hbWUiOiJ1c2VyLmNhbWVjb25uZWN0In0.I47GRwBO2KpJCkZsCGTqWHwEpycSid-EivumWAZbGDfus4ZtX2MF74uIVfPDMqRm38Dx7S5Q63PL-fqe9L5Q9vrFJ71yG9mw-nk9RFaWDMg60ka7j0hv9wu3XvFxP81qUK6dWuNEuF4mPCZesM6Wo9JYUimrx7ffvyJqtbCEOfn-0JkSC1CdY3dZoq8YN40WekG_e3bGRerNn4Uz8t_6NDi_ty7HwTjhuqNcMBJ7fqJJCdylsyRsPP8B2im8dPrtj5bgMS_6KnjCoFRWh-Bz_7KZooo7ho4HNTMLvFQQGfsR4xT_tVDy5BJyWI-K6F3-TIlFH810NbcKl1DBkMqpog",
-    "expires_in": 7199,
-    "scope": "",
-    "token_type": "bearer"
-}
- ---- RISPOSTA GET  Devices
- [
-    {
-        "_id": "5e627b640ff7cd0011c6602b",
-        "system": true,
-        "user": "user.cameconnect",
-        "name": "THs",
-        "items": [
-            {
-                "keycode": "67238978E4E70C2C",
-                "devcode": "67238978E4E70C2C",
-                "cameconnect": {
-                    "Keycode": "67238978E4E70C2C",
-                    "Description": "TH700WiFi",
-                    "ProductTypeId": 20,
-                    "ProductTypeName": "TH/700"
-                },
-                "Description": "TH700WiFi",
-                "ProductTypeId": 20,
-                "_id": "5e627da3e179beefc50ddcf8",
-                "Compile time": "Jul 10 2019 10:06:14",
-                "Global FW Version": "1.00.001",
-                "Slot": 1052672,
-                "WiFi FW Version": "1.00.001",
-                "on_line": 0,
-                "updatedAt": "2020-03-24T17:24:40.737Z",
-                "chunk_rate": 1,
-                "chunk_size": 1024,
-                "crc32": "E25098DB",
-                "error": "None",
-                "page_max": 512,
-                "page_size": 4096,
-                "algo": {
-                    "PI_band": 1.7,
-                    "T_cycle": 30,
-                    "T_off_min": 4,
-                    "T_on_min": 4,
-                    "n_prog": 4,
-                    "t_diff": 0.7,
-                    "type": "diff"
-                },
-                "comfort_state": false,
-                "current_season": "summer",
-                "hum_loc": 45,
-                "manual_temp": 30,
-                "mode": "manual",
-                "relay_status": 0,
-                "st_fw_version": "V1.00.001",
-                "temp_loc": 19.2,
-                "winter": {
-                    "T0": 3.4,
-                    "T1": 16.29,
-                    "T2": 18.2,
-                    "T3": 20.1,
-                    "day1": "555555555555FFFF555555FFFFAAAAAAAAFFFFFFFFFF5555",
-                    "day2": "555555555555FFFF555555FFFFAAAAAAAAFFFFFFFFFF5555",
-                    "day3": "555555555555FFFF555555FFFFAAAAAAAAFFFFFFFFFF5555",
-                    "day4": "555555555555FFFF555555FFFFAAAAAAAAFFFFFFFFFF5555",
-                    "day5": "555555555555FFFF555555FFFFEAAAAAAAFFFFFFFFFF5555",
-                    "day6": "55555555555555FFFFFFFFFFFFFFAAAAAAFFFFFFFFFF5555",
-                    "day7": "55555555555555FFFFFFFFFFFFFFAAAAAAFFFFFFFFFF5555"
-                },
-                "boost_level": 3,
-                "boost_rem_minutes": 0,
-                "buzzer": true,
-                "holiday_days": 3,
-                "holiday_rem_days": 0,
-                "keyboard_lock": false,
-                "set_point_temp": 30,
-                "stdby_mode": "proximity",
-                "summer": {
-                    "T1": 23.9,
-                    "T2": 25.9,
-                    "T3": 27.9,
-                    "day1": "FFFFFFFFFFFF55555555555555555555555555555555FFFF",
-                    "day2": "FFFFFFFFFFFF55555555555555555555555555555555FFFF",
-                    "day3": "FFFFFFFFFFFF55555555555555555555555555555555FFFF",
-                    "day4": "FFFFFFFFFFFF55555555555555555555555555555555FFFF",
-                    "day5": "FFFFFFFFFFFF55555555555555555555555555555555FFFF",
-                    "day6": "FFFFFFFFFFFF55555555555555555555555555555555FFFF",
-                    "day7": "FFFFFFFFFFFF55555555555555555555555555555555FFFF"
-                },
-                "automatic_hour_change": true,
-                "light_skin": false,
-                "max_temp": 35,
-                "min_temp": 3,
-                "offset_temp": 0,
-                "t_threshold_high": 0,
-                "t_threshold_low": 0,
-                "alarm_h_low": false,
-                "alarm_t_high": false,
-                "alarm_t_low": false,
-                "h_threshold_enable": false,
-                "h_threshold_high": 134260089,
-                "h_threshold_low": 134260059,
-                "t_threshold_enable": false,
-                "alarm_h_high": false
-            }
-        ],
-        "sceneries": [
-            {
-                "_id": "5e627b640ff7cd0011c6602d",
-                "name": "Esco di casa",
-                "name_translated": "scenery_1",
-                "actions": [],
-                "group_id": "5e627b640ff7cd0011c6602b"
-            },
-            {
-                "_id": "5e627b640ff7cd0011c6602f",
-                "name": "Sto in casa",
-                "name_translated": "scenery_2",
-                "actions": [],
-                "group_id": "5e627b640ff7cd0011c6602b"
-            },
-            {
-                "_id": "5e627b640ff7cd0011c66031",
-                "name": "Vado a letto",
-                "name_translated": "scenery_3",
-                "actions": [],
-                "group_id": "5e627b640ff7cd0011c6602b"
-            }
-        ]
-    }
-]
-  *
-  * */
 }

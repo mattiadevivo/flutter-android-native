@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:thermo_module/widget_files/hour_painter.dart';
-import 'widget_files/thermo_widget.dart';
-import 'widget_files/utils.dart';
-import 'network_files/rest_client.dart';
+import 'package:thermo_module/widget/hour_painter.dart';
+import 'widget/thermo_widget.dart';
+import 'widget/utils.dart';
+import 'network/rest_client.dart';
 
 /// GLOBAL variables
 final double minTemp = 4.0;
 final double maxTemp = 30.0;
 
+/// Dart entrypoint.
 void main() => runApp(MyApp());
 
 /// Simple app displaying a page with the Thermo widget.
@@ -27,11 +28,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// Page displaying the T1,T2,T3 values.
 class TempPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _TempPageState();
 }
 
+/// State for TempPage page.
 class _TempPageState extends State<TempPage> {
   double t1 = 16.8;
   double t2 = 17.0;
@@ -51,17 +54,19 @@ class _TempPageState extends State<TempPage> {
     );
   }
 
+  /// Widget which displays actual T1,T2,T3 values and make it possible to change
+  /// them.
   Widget _managersTile() => Column(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     children: <Widget>[
-      _tempManager(t1, 'T1', Icons.work, Colors.deepPurple, () {
+      _tempManager(t1, 'T1', Icons.brightness_3, Colors.brown[400], () {
         if (double.parse((t1 - 0.1).toStringAsFixed(1)) >= minTemp)
           setState(() => t1 = double.parse((t1 - 0.1).toStringAsFixed(1)));
       }, () {
         if (t1 + 0.1 < t2)
           setState(() => t1 = double.parse((t1 + 0.1).toStringAsFixed(1)));
       }),
-      _tempManager(t2, 'T2', Icons.brightness_3, Colors.brown[400], () {
+      _tempManager(t2, 'T2', Icons.work, Colors.deepPurple, () {
         if (t2 - 0.1 > t1)
           setState(() => t2 = double.parse((t2 - 0.1).toStringAsFixed(1)));
       }, () {
@@ -78,6 +83,7 @@ class _TempPageState extends State<TempPage> {
     ],
   );
 
+  /// Widget for managing one of the temperatures.
   Widget _tempManager(double temperature, String text, IconData icon,
       Color color, Function remFunction, Function addFunction) =>
       Container(
@@ -122,6 +128,7 @@ class _TempPageState extends State<TempPage> {
       );
 }
 
+/// Page displaying the Thermo widget.
 class WidgetPage extends StatefulWidget {
   final double height = 300.0;
   final double width = 300;
@@ -130,6 +137,7 @@ class WidgetPage extends StatefulWidget {
   State<StatefulWidget> createState() => _WidgetPageState();
 }
 
+/// State for WidgetPage page.
 class _WidgetPageState extends State<WidgetPage> {
   /// Color of the circle.
   final baseColor = Color.fromRGBO(255, 255, 255, 0.3);
@@ -155,12 +163,18 @@ class _WidgetPageState extends State<WidgetPage> {
   /// selecting moving one of the handlers.
   String timeToPrint = '';
 
+  /// List of int values corresponding to the handler positions(using values 0:95)
+  ///
+  /// [0] => handler #1 position
+  /// [1] => handler #2 position
+  /// [2] => handler #3 position
+  /// [3] => handler #4 position.
   Future<List<int>> _dayFuture;
 
   @override
   void initState() {
     super.initState();
-    // Initial load.
+    // Download actual day configuration and returns the future.
     _dayFuture = RestApiHelper.getDayConfig(1, 'winter');
   }
 
@@ -199,11 +213,14 @@ class _WidgetPageState extends State<WidgetPage> {
         future: _dayFuture,
         builder: (BuildContext context, AsyncSnapshot<List<int>> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
+            // The request has been completed.
             if (snapshot.hasError) {
+              // The request got an error.
               return Center(
                 child: Text(snapshot.error.toString()),
               );
             }
+            // The request completed without errors.
             return Container(
               decoration: BoxDecoration(
                   gradient: RadialGradient(
@@ -249,6 +266,7 @@ class _WidgetPageState extends State<WidgetPage> {
               ),
             );
           } else {
+            // The request has not yet been completed.
             return Container(
               decoration: BoxDecoration(
                   gradient: RadialGradient(
